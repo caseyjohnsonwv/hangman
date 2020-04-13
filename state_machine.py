@@ -1,9 +1,9 @@
-from enum import Enum, auto
+from enum import IntEnum
 
-class StateMachine(Enum):
-    FIRST_TIME_LOAD = auto()
-    NEW_GAME = auto()
-    IN_PROGRESS = auto()
-    GAME_OVER = auto()
-    QUIT = auto()
-    UNDEFINED = auto()
+class StateMachine(IntEnum):
+    QUIT = -1
+    UNDEFINED = 0
+    FIRST_TIME_LOAD = 1
+    NEW_GAME = 2
+    IN_PROGRESS = 3
+    GAME_OVER = 4
