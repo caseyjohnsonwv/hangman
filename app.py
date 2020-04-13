@@ -66,7 +66,7 @@ def sms_reply():
                         payload = g.blanks
                     resp.message(payload)
             finally:
-                save_game()
+                save_game(g)
 
     # game over
     if state == StateMachine.GAME_OVER:
