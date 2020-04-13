@@ -8,7 +8,7 @@ class InvalidGuessError(HangmanError): pass
 class HangmanGame:
     def __init__(self, language):
         self.language = language.lower().strip()
-        with open("./dictionaries/{}.txt".format(language)) as f:
+        with open("./dictionaries/{}.txt".format(self.language)) as f:
             wordList = f.readlines()
         self.answer = randomChoice(wordList).upper().strip()
         self.blanks = ''.join(["_ "]*len(self.answer)).strip()
