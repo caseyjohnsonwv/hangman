@@ -59,7 +59,7 @@ def sms_reply():
                 if g.guess(msg):
                     state = StateMachine.GAME_OVER
                 else:
-                    wrongGuesses = sorted(list(g.guesses.intersect(g.wrong)))
+                    wrongGuesses = sorted(list(g.guesses.intersection(g.wrong)))
                     if wrongGuesses:
                         payload = '\n'.join([g.blanks, ','.join(wrongGuesses)])
                     else:
