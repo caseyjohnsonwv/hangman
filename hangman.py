@@ -15,15 +15,7 @@ class HangmanGame:
         self.guesses = set()
         self.wrong = frozenset(list(validLetters)).difference(list(self.answer))
 
-    def to_json():
-        """Used to serialize data in the browser session between requests"""
-        pass
-
-    def from_json():
-        """Used to deserialize data from the browser session after a request"""
-        pass
-
-    def _sanitize_guess_(self, letter):
+    def sanitize_guess(self, letter):
         letter = letter.upper().strip()
         if len(letter) != 1:
             raise InvalidGuessError()
@@ -34,7 +26,7 @@ class HangmanGame:
         return letter
 
     def guess(self, letter):
-        letter = self._sanitize_guess_(letter)
+        letter = self.sanitize_guess(letter)
         # check guess
         if letter in self.wrong:
             return False
@@ -46,3 +38,25 @@ class HangmanGame:
                 blanks_temp[i*2] = letter
                 self.blanks = ''.join(blanks_temp)
         return True
+
+    def __from_json__(data):
+        g = HangmanGame(data['language'])
+        g.answer = data['answer']
+        g.blanks = data['blanks']
+        g.guesses = data['guesses']
+        g.wrong = data['wrong']
+        return g
+
+    def from_json(data):
+        """Used to deserialize data from the browser after a request"""
+        return HangmanGame.__from_json__(data)
+
+    def to_json(self):
+        """Used to serialize data in the browser session between requests"""
+        j = {}
+        j['language'] = self.language
+        j['answer'] = self.answer
+        j['blanks'] = self.blanks
+        j['guesses'] = self.guesses
+        j['wrong'] = self.wrong
+        return j
