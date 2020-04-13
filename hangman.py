@@ -21,12 +21,11 @@ class HangmanGame:
             raise InvalidGuessError()
         elif letter in self.guesses:
             raise LetterAlreadyGuessedError()
-        else:
-            self.guesses.add(letter)
         return letter
 
     def guess(self, letter):
         letter = self.sanitize_guess(letter)
+        self.guesses.add(letter)
         # check guess
         if letter in self.wrong:
             return False
