@@ -59,9 +59,9 @@ def sms_reply():
                 if g.guess(msg):
                     state = StateMachine.GAME_OVER
                 else:
-                    wrongGuesses = g.wrong.difference(g.guesses)
+                    wrongGuesses = sorted(list(g.wrong.difference(g.guesses)))
                     if wrongGuesses:
-                        payload = '\n'.join([g.blanks, sorted(list(wrongGuesses))])
+                        payload = '\n'.join([g.blanks, ','.join(wrongGuesses)])
                     else:
                         payload = g.blanks
                     resp.message(payload)
