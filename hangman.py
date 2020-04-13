@@ -43,8 +43,8 @@ class HangmanGame:
         g = HangmanGame(data['language'])
         g.answer = data['answer']
         g.blanks = data['blanks']
-        g.guesses = data['guesses']
-        g.wrong = data['wrong']
+        g.guesses = set(data['guesses'])
+        g.wrong = set(data['wrong'])
         return g
 
     def from_json(data):
@@ -57,6 +57,6 @@ class HangmanGame:
         j['language'] = self.language
         j['answer'] = self.answer
         j['blanks'] = self.blanks
-        j['guesses'] = self.guesses
-        j['wrong'] = self.wrong
+        j['guesses'] = list(self.guesses)
+        j['wrong'] = list(self.wrong)
         return j
