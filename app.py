@@ -80,6 +80,7 @@ def sms_reply():
         state = StateMachine.FIRST_TIME_LOAD
 
     # send message(s)
+    session['gameState'] = state
     return str(resp)
 
 
