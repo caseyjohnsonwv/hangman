@@ -34,11 +34,11 @@ def sms_reply():
         if 'NEW GAME' in msg:
             state = StateMachine.NEW_GAME
         else:
-            resp.message("Hello! To play, text 'new game'!")
+            resp.message("Hello! Text 'new game' to play.")
 
     # new game
     if state == StateMachine.NEW_GAME:
-        resp.message("Starting a new game. Text a letter to guess, or text 'quit' at any time to stop.")
+        resp.message("Starting a new game. Text a letter to guess, or text 'cancel' at any time to stop.")
         g = HangmanGame("English")
         resp.message(g.blanks)
         save_game(g)
@@ -46,8 +46,8 @@ def sms_reply():
     # in progress
     elif state == StateMachine.IN_PROGRESS:
         g = load_game()
-        if 'QUIT' in msg:
-            state = StateMachine.QUIT
+        if 'CANCEL' in msg:
+            state = StateMachine.CANCEL
         else:
             try:
                 g.sanitize_guess(msg)
@@ -74,8 +74,8 @@ def sms_reply():
         resp.message("Congrats, the word was {}!".format(g.answer))
         resp.message("Text 'new game' to play again!")
         state = StateMachine.FIRST_TIME_LOAD
-    # player quit
-    elif state == StateMachine.QUIT:
+    # player CANCEL
+    elif state == StateMachine.CANCEL:
         resp.message("Oh, okay- text 'new game' any time to play again!")
         state = StateMachine.FIRST_TIME_LOAD
 
