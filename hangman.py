@@ -31,13 +31,13 @@ class HangmanGame:
         if letter in self.wrong:
             return False
         # update game data
+        blanks_temp = list(self.blanks)
         for i in range(len(self.answer)):
             if self.answer[i] == letter:
-                # strings are immutable - use a list, I guess :/
-                blanks_temp = list(self.blanks)
                 blanks_temp[i*2] = letter
-                self.blanks = ''.join(blanks_temp)
-        return True
+        self.blanks = ''.join(blanks_temp)
+        # return True if word is complete, False if not
+        return self.blanks[::2] == self.answer
 
     def __from_json__(data):
         g = HangmanGame(data['language'])
