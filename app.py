@@ -1,6 +1,6 @@
 import env
 from flask import Flask, request, session
-from twilio.twiml.message_response import MessagingResponse
+from twilio.twiml.messaging_response import MessagingResponse
 
 app = Flask(__name__)
 app.config.update(
