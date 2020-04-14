@@ -43,11 +43,11 @@ def sms_reply():
         if Keywords.NEW_GAME in msg:
             state = StateMachine.NEW_GAME
         elif Keywords.HELLO in msg:
-            resp.message("Hello! Text 'new game' to play.")
+            resp.message("Hello! Text {} to play.".format(Keywords.NEW_GAME))
 
     # new game
     if state == StateMachine.NEW_GAME:
-        resp.message("Starting a new game. Text a letter to guess, or text 'later' at any time to stop.")
+        resp.message("Starting a new game. Text a letter or word to guess, or text {} to stop.".format(Keywords.LATER))
         g = HangmanGame()
         resp.message(g.blanks)
         save_game(g)
@@ -61,7 +61,12 @@ def sms_reply():
             try:
                 g.sanitize_guess(msg)
             except InvalidGuessError:
-                resp.message("Whoops- I didn't understand your guess! Try again.")
+                if msg == g.answer:
+                    state = StateMachine.GAME_OVER
+                elif len(msg) == len(g.answer):
+                    resp.message("Nope, the word is not {}! Keep guessing letters.".format(msg))
+                else:
+                    resp.message("Whoops- I didn't understand your guess! Try again.")
             except LetterAlreadyGuessedError:
                 resp.message("Whoops- you already guessed that letter! Try again.")
             else:
@@ -92,11 +97,11 @@ def sms_reply():
         else:
             reaction = "Sorry"
         resp.message("{}, the word was {}!".format(reaction, g.answer))
-        resp.message("Text 'new game' to play again!")
+        resp.message("Text {} to play again!".format(Keywords.NEW_GAME))
         state = StateMachine.FIRST_TIME_LOAD
     # player LATER
     elif state == StateMachine.LATER:
-        resp.message("Oh, okay- text 'new game' any time to play again!")
+        resp.message("Oh, okay- text {} any time to play again!".format(Keywords.NEW_GAME))
         state = StateMachine.FIRST_TIME_LOAD
 
     # send message(s)
