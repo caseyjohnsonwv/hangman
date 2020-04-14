@@ -39,7 +39,7 @@ def sms_reply():
     # new game
     if state == StateMachine.NEW_GAME:
         resp.message("Starting a new game. Text a letter to guess, or text 'later' at any time to stop.")
-        g = HangmanGame("English")
+        g = HangmanGame()
         resp.message(g.blanks)
         save_game(g)
         state = StateMachine.IN_PROGRESS
@@ -56,12 +56,12 @@ def sms_reply():
             except LetterAlreadyGuessedError:
                 resp.message("Whoops- you already guessed that letter! Try again.")
             else:
-                if g.guess(msg):
+                if g.guess(msg) or g.max_wrong_exceeded():
                     state = StateMachine.GAME_OVER
                 else:
                     wrongGuesses = sorted(list(g.guesses.intersection(g.wrong)))
                     if wrongGuesses:
-                        payload = '\n'.join([g.blanks, ','.join(wrongGuesses)])
+                        payload = '\n'.join([g.blanks, ', '.join(wrongGuesses)])
                     else:
                         payload = g.blanks
                     resp.message(payload)
@@ -71,7 +71,8 @@ def sms_reply():
     # game over
     if state == StateMachine.GAME_OVER:
         g = load_game()
-        resp.message("Congrats, the word was {}!".format(g.answer))
+        reaction = "Sorry" if g.max_wrong_exceeded() else "Congrats"
+        resp.message("{}, the word was {}!".format(reaction, g.answer))
         resp.message("Text 'new game' to play again!")
         state = StateMachine.FIRST_TIME_LOAD
     # player LATER
