@@ -63,6 +63,8 @@ def sms_reply():
             except InvalidGuessError:
                 if msg == g.answer:
                     state = StateMachine.GAME_OVER
+                elif len(msg) == len(g.answer):
+                    resp.message("Nope- it's not {}! Try again.".format(msg))
                 else:
                     resp.message("Whoops- I didn't understand your guess! Try again.")
             except LetterAlreadyGuessedError:
