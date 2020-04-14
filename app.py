@@ -10,6 +10,11 @@ app.config.update(
     SECRET_KEY = env.APP_SECRET_KEY,
 )
 
+class Keywords:
+    HELLO = "HELLO"
+    NEW_GAME = "NEW GAME"
+    LATER = "LATER"
+
 
 def save_game(game):
     session['gameData'] = game.to_json()
@@ -31,9 +36,9 @@ def sms_reply():
 
     # first time load
     if state == StateMachine.FIRST_TIME_LOAD:
-        if 'NEW GAME' in msg:
+        if Keywords.NEW_GAME in msg:
             state = StateMachine.NEW_GAME
-        else:
+        elif Keywords.HELLO in msg:
             resp.message("Hello! Text 'new game' to play.")
 
     # new game
@@ -46,7 +51,7 @@ def sms_reply():
     # in progress
     elif state == StateMachine.IN_PROGRESS:
         g = load_game()
-        if 'LATER' in msg:
+        if Keywords.LATER in msg:
             state = StateMachine.LATER
         else:
             try:
