@@ -10,18 +10,27 @@ app.config.update(
     SECRET_KEY = env.APP_SECRET_KEY,
 )
 
+class Keywords:
+    HELLO = "HELLO"
+    NEW_GAME = "NEW GAME"
+    LATER = "LATER"
+
+class SessionKeys:
+    GAME_DATA = 'gameData'
+    STATE_DATA = 'stateData'
+
 
 def save_game(game):
-    session['gameData'] = game.to_json()
+    session[SessionKeys.GAME_DATA] = game.to_json()
 def load_game():
-    return HangmanGame.from_json(session['gameData'])
+    return HangmanGame.from_json(session[SessionKeys.GAME_DATA])
 
 
 @app.route('/sms', methods=['POST'])
 def sms_reply():
     # retrieve game state
     try:
-        state = session['gameState']
+        state = session[SessionKeys.STATE_DATA]
     except KeyError:
         state = StateMachine.FIRST_TIME_LOAD
 
@@ -31,22 +40,22 @@ def sms_reply():
 
     # first time load
     if state == StateMachine.FIRST_TIME_LOAD:
-        if 'NEW GAME' in msg:
+        if Keywords.NEW_GAME in msg:
             state = StateMachine.NEW_GAME
-        else:
+        elif Keywords.HELLO in msg:
             resp.message("Hello! Text 'new game' to play.")
 
     # new game
     if state == StateMachine.NEW_GAME:
         resp.message("Starting a new game. Text a letter to guess, or text 'later' at any time to stop.")
-        g = HangmanGame("English")
+        g = HangmanGame()
         resp.message(g.blanks)
         save_game(g)
         state = StateMachine.IN_PROGRESS
     # in progress
     elif state == StateMachine.IN_PROGRESS:
         g = load_game()
-        if 'LATER' in msg:
+        if Keywords.LATER in msg:
             state = StateMachine.LATER
         else:
             try:
@@ -61,17 +70,28 @@ def sms_reply():
                 else:
                     wrongGuesses = sorted(list(g.guesses.intersection(g.wrong)))
                     if wrongGuesses:
-                        payload = '\n'.join([g.blanks, ','.join(wrongGuesses)])
+                        payload = '\n'.join([g.blanks, ', '.join(wrongGuesses)])
                     else:
                         payload = g.blanks
                     resp.message(payload)
+                    if g.max_wrong_exceeded():
+                        resp.message("Uh oh- you're all out of guesses! What's the word?")
+                        state = StateMachine.FINAL_GUESS
             finally:
                 save_game(g)
+    # final guess
+    elif state == StateMachine.FINAL_GUESS:
+        # separate state used to bypass LATER recognition and guess sanitizaiton
+        state = StateMachine.GAME_OVER
 
     # game over
     if state == StateMachine.GAME_OVER:
         g = load_game()
-        resp.message("Congrats, the word was {}!".format(g.answer))
+        if g.answer == msg or not g.max_wrong_exceeded():
+            reaction = "Congrats"
+        else:
+            reaction = "Sorry"
+        resp.message("{}, the word was {}!".format(reaction, g.answer))
         resp.message("Text 'new game' to play again!")
         state = StateMachine.FIRST_TIME_LOAD
     # player LATER
@@ -80,7 +100,7 @@ def sms_reply():
         state = StateMachine.FIRST_TIME_LOAD
 
     # send message(s)
-    session['gameState'] = state
+    session[SessionKeys.STATE_DATA] = state
     return str(resp)
 
 

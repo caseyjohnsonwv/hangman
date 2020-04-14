@@ -6,7 +6,8 @@ class LetterAlreadyGuessedError(HangmanError): pass
 class InvalidGuessError(HangmanError): pass
 
 class HangmanGame:
-    def __init__(self, language):
+    def __init__(self, language="english", max_wrong=5):
+        self.max_wrong = max_wrong
         self.language = language.lower().strip()
         with open("./dictionaries/{}.txt".format(self.language)) as f:
             wordList = f.readlines()
@@ -38,12 +39,17 @@ class HangmanGame:
         # return True if word is complete, False if not
         return self.blanks[::2] == self.answer
 
+    def max_wrong_exceeded(self):
+        wrong_guesses = self.guesses.intersection(self.wrong)
+        return len(wrong_guesses) > self.max_wrong
+
     def __from_json__(data):
         g = HangmanGame(data['language'])
         g.answer = data['answer']
         g.blanks = data['blanks']
         g.guesses = set(data['guesses'])
         g.wrong = set(data['wrong'])
+        g.max_wrong = data['max_wrong']
         return g
 
     def from_json(data):
@@ -58,4 +64,5 @@ class HangmanGame:
         j['blanks'] = self.blanks
         j['guesses'] = list(self.guesses)
         j['wrong'] = list(self.wrong)
+        j['max_wrong'] = self.max_wrong
         return j
