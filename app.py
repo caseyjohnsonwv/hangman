@@ -15,18 +15,22 @@ class Keywords:
     NEW_GAME = "NEW GAME"
     LATER = "LATER"
 
+class SessionKeys:
+    GAME_DATA = 'gameData'
+    STATE_DATA = 'stateData'
+
 
 def save_game(game):
-    session['gameData'] = game.to_json()
+    session[SessionKeys.GAME_DATA] = game.to_json()
 def load_game():
-    return HangmanGame.from_json(session['gameData'])
+    return HangmanGame.from_json(session[SessionKeys.GAME_DATA])
 
 
 @app.route('/sms', methods=['POST'])
 def sms_reply():
     # retrieve game state
     try:
-        state = session['gameState']
+        state = session[SessionKeys.STATE_DATA]
     except KeyError:
         state = StateMachine.FIRST_TIME_LOAD
 
@@ -86,7 +90,7 @@ def sms_reply():
         state = StateMachine.FIRST_TIME_LOAD
 
     # send message(s)
-    session['gameState'] = state
+    session[SessionKeys.STATE_DATA] = state
     return str(resp)
 
 
