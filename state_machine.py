@@ -6,4 +6,5 @@ class StateMachine(IntEnum):
     FIRST_TIME_LOAD = 1
     NEW_GAME = 2
     IN_PROGRESS = 3
-    GAME_OVER = 4
+    FINAL_GUESS = 4
+    GAME_OVER = 5

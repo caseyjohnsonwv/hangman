@@ -65,7 +65,7 @@ def sms_reply():
             except LetterAlreadyGuessedError:
                 resp.message("Whoops- you already guessed that letter! Try again.")
             else:
-                if g.guess(msg) or g.max_wrong_exceeded():
+                if g.guess(msg):
                     state = StateMachine.GAME_OVER
                 else:
                     wrongGuesses = sorted(list(g.guesses.intersection(g.wrong)))
@@ -74,13 +74,23 @@ def sms_reply():
                     else:
                         payload = g.blanks
                     resp.message(payload)
+                    if g.max_wrong_exceeded():
+                        resp.message("Uh oh- you're all out of guesses! What's the word?")
+                        state = StateMachine.FINAL_GUESS
             finally:
                 save_game(g)
+    # final guess
+    elif state == StateMachine.FINAL_GUESS:
+        # separate state used to bypass LATER recognition and guess sanitizaiton
+        state = StateMachine.GAME_OVER
 
     # game over
     if state == StateMachine.GAME_OVER:
         g = load_game()
-        reaction = "Sorry" if g.max_wrong_exceeded() else "Congrats"
+        if g.answer == msg or not g.max_wrong_exceeded():
+            reaction = "Congrats"
+        else:
+            reaction = "Sorry"
         resp.message("{}, the word was {}!".format(reaction, g.answer))
         resp.message("Text 'new game' to play again!")
         state = StateMachine.FIRST_TIME_LOAD
